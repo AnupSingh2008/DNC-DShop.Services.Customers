@@ -26,18 +26,21 @@ namespace DShop.Services.Customers.Handlers.Customers
 
         public async Task HandleAsync(CreateCustomer command, ICorrelationContext context)
         {
-            var customer = await _customersRepository.GetAsync(command.Id);
-            if (customer.Completed)
-            {
-                throw new DShopException(Codes.CustomerAlreadyCompleted,
-                    $"Customer account was already created for user with id: '{command.Id}'.");
-            }
+            // var customer = await _customersRepository.GetAsync(command.Id);
+            //if (customer.Completed)
+            //{
+            //    throw new DShopException(Codes.CustomerAlreadyCompleted,
+            //        $"Customer account was already created for user with id: '{command.Id}'.");
+            //}
 
-            customer.Complete(command.FirstName, command.LastName, command.Address, command.Country);
-            await _customersRepository.UpdateAsync(customer);
+
+            //customer.Complete(command.FirstName, command.LastName, command.Address, command.Country);
+            Customer obj = new Customer(command.Id, "");
+            obj.Complete(command.FirstName, command.LastName, command.Address, command.Country);
+            await _customersRepository.AddAsync(obj);
             var cart = new Cart(command.Id);
             await _cartsRepository.AddAsync(cart);
-            await _busPublisher.PublishAsync(new CustomerCreated(command.Id, customer.Email,
+            await _busPublisher.PublishAsync(new CustomerCreated(command.Id, obj.Email,
                 command.FirstName, command.LastName, command.Address, command.Country), context);
         }
     }
